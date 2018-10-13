@@ -1,0 +1,73 @@
+# Import libraries
+import requests
+from bs4 import BeautifulSoup
+import csv
+import pandas as pd
+
+pages = []
+
+dates=["2017-07-27","2017-07-28","2017-08-05","2017-08-06","2017-08-13","2017-08-15","2017-08-19","2017-08-26","2017-08-27",
+       "2017-09-02","2017-09-03","2017-09-09","2017-09-10","2017-09-16","2017-09-17","2017-09-23","2017-09-24","2017-09-24",
+      "2017-10-07","2017-10-08","2017-10-14","2017-10-15","2017-10-28","2017-10-29"]
+
+df = pd.DataFrame(columns = ['Pl No', 'H.No','Horse','Desc','Trainer','Jockey','Wt','Al','Dr','Sh','Won By','Dist Win','Ratings','Odds','Time'])
+
+for i in dates:
+    url = 'http://www.indiarace.com/Home/racingCenterEvent?venueId=10&event_date=' + str(i) + '&race_type=RESULTS'
+    pages.append(url)
+    for item in pages:
+        page = requests.get(item)
+        soup = BeautifulSoup(page.text, 'html.parser')
+        race_1 = soup.find_all(class_='table-responsive table-border-radius')
+        
+        
+        for i in race_1:
+            race1=i.find_all(class_='dividend_tr')
+            for row in race1:
+                cells = row.find_all("td")
+                links = row.find('a')
+                pl_no = cells[0].get_text().strip('\n')
+                hno= cells[1].get_text().strip('\n')
+                horse=links.contents[0].strip('\n')
+                age=cells[3].get_text().strip('\n')
+                trainer=cells[4].get_text().strip('\n')
+                jockey=cells[5].get_text().strip('\n')
+                wt=cells[6].get_text().strip('\n')
+                al=cells[7].get_text().strip('\n')
+                dr=cells[8].get_text().strip('\n')
+                sh=cells[9].get_text().strip('\n')
+                wb=cells[10].get_text().strip('\n')
+                dw=cells[11].get_text().strip('\n')
+                ratings=cells[12].get_text().strip('\n')
+                odds=cells[13].get_text().strip('\n')
+                time=cells[14].get_text().strip('\n')
+
+                df=df.append({'Pl No':pl_no, 'H.No':hno,'Horse':horse,'Desc':age,'Trainer':trainer,'Jockey':jockey,'Wt':wt,'Al':al,'Dr':dr,'Sh':sh,'Won By':wb,'Dist Win':dw,'Ratings':ratings,'Odds':odds,'Time':time},ignore_index=True)
+
+
+print (df.head())
+    #        print(pl_no)
+    #        print(hno)
+    #        print(horse)
+    #        print(age)
+    #        print(trainer)
+    #        print(jockey)
+    #        print(wt)
+    #        print(al)
+    #        print(dr)
+    #        print(sh)
+    #        print(wb)
+    #        print(dw)
+    #        print(ratings)
+    #        print(odds)
+    #        print(time)
+
+        
+        
+
+df.to_csv('PuneSeason17.csv')
+#         if len(df)>0:
+#             df.append({'Pl No':pl_no, 'H.No':hno,'Horse':horse,'Desc':age,'Trainer':trainer,'Jockey':jockey,'Wt':wt,'Al':al,'Dr':dr,'Sh':sh,'Won By':wb,'Dist Win':dw,'Ratings':ratings,'Odds':odds,'Time':time},ignore_index=True)
+            
+#         else:
+#             df.append({'Pl No':pl_no, 'H.No':hno,'Horse':horse,'Desc':age,'Trainer':trainer,'Jockey':jockey,'Wt':wt,'Al':al,'Dr':dr,'Sh':sh,'Won By':wb,'Dist Win':dw,'Ratings':ratings,'Odds':odds,'Time':time},ignore_index=True)
